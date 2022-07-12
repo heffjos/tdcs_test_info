@@ -36,6 +36,33 @@ MONTHS = {
     'december': 12,
 }
 
+KNOWN_TESTS = {
+    'AVM_N(1)',
+    'AVM_N(2)',
+    'AVM_W(1)',
+    'AVM_W(2)',
+    'CTP',
+    'DefName(1)',
+    'DefName(2)',
+    'PhonSTM5(a)',
+    'PhonSTM5(b)',
+    'Reading(1)',
+    'Reading(2)',
+    'RepeatNon',
+    'RhymeNon',
+    'RhymeWord',
+    'SVPicName(1)',
+    'SVPicName(2)',
+    'SemPic(1)',
+    'SemPic(2)',
+    'SemText(1)',
+    'SemText(2)',
+    'WPMAud',
+    'WPMVis',
+    'f_ASenComp',
+    's_WSenComp'
+}
+
 def remove_extension(fname):
     return re.sub('( \([0-9]+\))?\.txt$', '', fname)
 
@@ -282,7 +309,7 @@ def main():
 
         sys.exit()
 
-    all_test = set(df['test'])
+    all_test = KNOWN_TESTS.union(set(df['test']))
 
     if dates is not None:
         df = df.loc[df['date'].ge(dates[0]) & df['date'].le(dates[1])]
