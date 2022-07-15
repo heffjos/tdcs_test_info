@@ -323,8 +323,8 @@ def main():
     if missing_tests:
         print('Here are the missing tests:')
         missing = all_test.difference(df['test'])
-        for one_test in missing:
-            print('\t{missing}')
+        for one_test in sorted(missing):
+            print(f'\t{one_test}')
 
         sys.exit()
 
