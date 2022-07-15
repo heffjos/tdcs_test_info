@@ -328,7 +328,8 @@ def main():
 
         sys.exit()
 
-    print(df.sort_values('date', ignore_index=True).to_string())
+    print(df.sort_values('file_name', ignore_index=True).to_string())
+
 if __name__ == '__main__':
     main()
 
