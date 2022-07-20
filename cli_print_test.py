@@ -18,7 +18,7 @@ import pandas as pd
 
 DATE_REGEX = [
     '([0-9][0-9]?)([A-Z][a-z]+)([0-9]{2})_([0-9]{4})$',
-    '([0-9][0-9]?)_([0-9][0-9]?)_([0-9]{2})_([0-9]{4})([AP]M)$',
+    '([0-9][0-9]?)_([0-9][0-9]?)_([0-9]{2})_([0-9]?[0-9]{3})([AP]M)$',
 ]
 
 MONTHS = {
@@ -113,8 +113,8 @@ def is_valid_name(fname):
 
     if ((re.search(r'[0-9]{4}(\.txt)?$', fname) or
          re.search(r'[0-9] \([0-9]\)(\.txt)?$', fname) or
-         re.search(r'[0-9]{4}[AP]M(\.txt)?$', fname) or
-         re.search(r'[0-9]{4}[AP]M \([0-9]\)(\.txt)?$', fname)) and
+         re.search(r'[0-9]?[0-9]{3}[AP]M(\.txt)?$', fname) or
+         re.search(r'[0-9]?[0-9]{3}[AP]M \([0-9]\)(\.txt)?$', fname)) and
          fname.count('_') > 2):
         return True
     else:
