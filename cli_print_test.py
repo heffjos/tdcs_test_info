@@ -18,7 +18,7 @@ import pandas as pd
 
 DATE_REGEX = [
     '([0-9][0-9]?)([A-Z][a-z]+)([0-9]{2})_([0-9]{4})$',
-    '([0-9][0-9]?)_([0-9][0-9]?)_([0-9]{2})_([0-9]?[0-9]{3})([AP]M)$',
+    '([0-9][0-9]?)[\-_]([0-9][0-9]?)[\-_]([0-9]{2})[\-_]([0-9]?[0-9]{3})([AP]M)$',
 ]
 
 MONTHS = {
@@ -59,8 +59,8 @@ KNOWN_TESTS = {
     'SemText(2)',
     'WPMAud',
     'WPMVis',
-    'f_ASenComp',
-    's_WSenComp'
+    'f-ASenComp',
+    's-WSenComp'
 }
 
 def remove_extension(fname):
@@ -115,7 +115,7 @@ def is_valid_name(fname):
          re.search(r'[0-9] \([0-9]\)(\.txt)?$', fname) or
          re.search(r'[0-9]?[0-9]{3}[AP]M(\.txt)?$', fname) or
          re.search(r'[0-9]?[0-9]{3}[AP]M \([0-9]\)(\.txt)?$', fname)) and
-         fname.count('_') > 2):
+         fname.count('_') >= 1):
         return True
     else:
         return False
@@ -172,7 +172,6 @@ def process_directory(dname):
 
     results = {
         'file_name': [],
-        'modified_file_name': [],
         'participant': [],
         'test': [],
         'date': [],
@@ -182,12 +181,10 @@ def process_directory(dname):
     dname = Path(dname).resolve()
     directory_files = [x.name for x in dname.iterdir() if x.is_file()]
     for fname in directory_files:
-        modified_fname = fname.replace('-', '_')
 
-        if is_valid_name(modified_fname):
-            participant, tname, time = parse_file(modified_fname)
+        if is_valid_name(fname):
+            participant, tname, time = parse_file(fname)
             results['file_name'].append(fname)
-            results['modified_file_name'].append(modified_fname)
             results['participant'].append(participant)
             results['test'].append(tname)
             results['date'].append(time)
