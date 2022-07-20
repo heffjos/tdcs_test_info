@@ -172,6 +172,7 @@ def process_directory(dname):
 
     results = {
         'file_name': [],
+        'modified_file_name': [],
         'participant': [],
         'test': [],
         'date': [],
@@ -181,11 +182,12 @@ def process_directory(dname):
     dname = Path(dname).resolve()
     directory_files = [x.name for x in dname.iterdir() if x.is_file()]
     for fname in directory_files:
-        fname = fname.replace('-', '_')
+        modified_fname = fname.replace('-', '_')
 
-        if is_valid_name(fname):
-            participant, tname, time = parse_file(fname)
+        if is_valid_name(modified_fname):
+            participant, tname, time = parse_file(modified_fname)
             results['file_name'].append(fname)
+            results['modified_file_name'].append(modified_fname)
             results['participant'].append(participant)
             results['test'].append(tname)
             results['date'].append(time)
@@ -213,7 +215,7 @@ The first date format is the most common.
 
 Here are some example usage:
 
-    Display the hep and exit:
+    Display the help and exit:
 
         cli_print_test --help
 
@@ -232,14 +234,6 @@ Here are some example usage:
     List all the 'Reading(2)' tests:
 
         cli_print_test --test 'Reading(2)' --directory /directory/path
-
-    Display missing tests for participant MCWA004 within inclusive range 2020-1-15 to 2020-1-23:
-
-        cli_print_test --missing_tests --participant MCWA004 --date_range 2020-1-15 2020-1-23 --directory /directory/path
-
-    Display all the invalid files found and immediately exit:
-
-        cli_print_test --directory /directory/path --list_invalid_files
 """
 
     parser = ArgumentParser(
@@ -274,18 +268,6 @@ Here are some example usage:
         help='list only information regarding this test.'
     )
 
-    parser.add_argument(
-        '--missing_tests', 
-        action='store_true',
-        help='list only missing tests'
-    )
-
-    parser.add_argument(
-        '--list_invalid_files', 
-        action='store_true',
-        help='list the invalid files and exit the program',
-    )
-
     return parser
 
 def main():
@@ -296,18 +278,8 @@ def main():
     dates = args.date_range
     participant = args.participant
     test = args.test
-    missing_tests = args.missing_tests
-    list_invalid_files = args.list_invalid_files
 
     df, invalid_files = process_directory(directory)
-
-    if list_invalid_files:
-        print(f'Here are the invalid files:')
-
-        for invalid_file in invalid_files:
-            print(f'\t{invalid_file}')
-
-        sys.exit()
 
     all_test = KNOWN_TESTS.union(set(df['test']))
 
@@ -317,18 +289,36 @@ def main():
     if participant is not None:
         df = df.loc[df['participant'].eq(participant)]
 
+    missing = all_test.difference(df['test'])
+
     if test is not None:
         df = df.loc[df['test'].eq(test)]
 
-    if missing_tests:
-        print('Here are the missing tests:')
-        missing = all_test.difference(df['test'])
-        for one_test in sorted(missing):
-            print(f'\t{one_test}')
+    if dates is not None and participant is not None:
+        msg = 'Here are the tests for pariticipant {} between dates {} {}'.format(
+            participant, dates[0], dates[1]
+        )
+    elif dates is not None:
+        msg = 'Here are all the tests between dates {} {}'.format(
+            dates[0], dates[1]
+        )
+    elif participant is not None:
+        msg = f'Here are all the tests for participant {participant}'
+    else:
+        msg = 'Here are all the tests.'
 
-        sys.exit()
+    print(f'\n{msg}')
+    print_df = df[['file_name', 'participant', 'test', 'date']]
+    print(print_df.sort_values('file_name', ignore_index=True).to_string())
 
-    print(df.sort_values('file_name', ignore_index=True).to_string())
+    print('\nHere are the missing tests:')
+    for one_test in sorted(missing):
+        print(f'\t{one_test}')
+
+    print(f'\nHere are the invalid files:')
+    for invalid_file in invalid_files:
+        print(f'\t{invalid_file}')
+
 
 if __name__ == '__main__':
     main()
